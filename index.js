@@ -1,10 +1,13 @@
 let recognizer;
 
 const classMap = ["啊", "哦", "呀", "嗯", "Other"];
+const LOCAL_NAME = "indexeddb://my-model";
 
 const rangeContiner = document.querySelector("#ranges");
 
 const buttonContiner = document.querySelector("#buttons");
+
+const uploderContiner = document.querySelector("#uploders");
 
 const result = document.querySelector("#result");
 
@@ -15,6 +18,17 @@ classMap.forEach((className, i) => {
   button.setAttribute("onmouseup", `collect(null)`);
   buttonContiner.appendChild(button);
 });
+
+// classMap.forEach((className, i) => {
+//   const input = document.createElement("input");
+//   input.setAttribute("type", "file");
+//   input.setAttribute("accept", "audio/*");
+//   input.setAttribute("onchange", `onUploadWAVExapmles(event, ${i})`);
+//   uploderContiner.appendChild(input);
+//   uploderContiner.appendChild(document.createTextNode(className));
+//   uploderContiner.appendChild(document.createElement("br"));
+
+// });
 
 classMap.forEach((className, i) => {
   const input = document.createElement("input");
@@ -37,7 +51,8 @@ classMap.forEach((className, i) => {
   rangeContiner.appendChild(document.createElement("br"));
 });
 
-const LOCAL_NAME = "indexeddb://my-model";
+
+
 
 function predictWord() {
   // Array of words that the recognizer is trained to recognize.
@@ -92,6 +107,23 @@ function collect(label) {
     }
   );
 }
+
+function onUploadWAVExapmles(e, index) {
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = async function () {
+    const buffer = this.result;
+    const values = normalize(new Float32Array(buffer));
+    examples.push({ vals: values, label: index });
+    document.querySelector(
+      "#console"
+    ).textContent = `${examples.length} examples collected`;
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+
+
 
 function normalize(x) {
   const mean = -100;
